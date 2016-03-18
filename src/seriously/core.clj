@@ -3,6 +3,29 @@
         [clojure.repl :only (doc)]
         [test.core :only [is=]]))
 
+(defn get-hash [type data]
+  (.digest (java.security.MessageDigest/getInstance type) (.getBytes data)))
+
+(defn sha1-hash [data]
+  (get-hash "sha1" data))
+
+(defn
+  ^{:doc  "sha 1 hasher from stack overflow gist: https://gist.github.com/prasincs/827272"
+    :test (fn []
+            (is (= (get-hash-str (sha1-hash "dallas")) "23f2916e01209d6282f226be9677affaec44a8d6"))
+            )}
+  get-hash-str [data-bytes]
+  (apply str
+         (map
+           #(.substring
+             (Integer/toString
+               (+ (bit-and % 0xff) 0x100) 16) 1)
+           data-bytes)
+         ))
+
+(defn sha1 [string]
+  (get-hash-str (sha1-hash string)))
+
 (defn
   ^{:doc  "next permutaion calculator ported from Scala
 
@@ -56,13 +79,38 @@
 
   "
     :test (fn []
-            (is (= (permutation-seq->string [1] "adsl") "a"))
-            (is (= (permutation-seq->string [2] "adsl") "d"))
-            (is (= (permutation-seq->string [3] "adsl") "s"))
-            (is (= (permutation-seq->string [4] "adsl") "l"))
-            (is (= (permutation-seq->string [2 1 4 4 1 3] "adsl") "dallas"))
+            (is (= (permutation-seq->string "adsl" [1]) "a"))
+            (is (= (permutation-seq->string "adsl" [2]) "d"))
+            (is (= (permutation-seq->string "adsl" [3]) "s"))
+            (is (= (permutation-seq->string "adsl" [4]) "l"))
+            (is (= (permutation-seq->string "adsl" [2 1 4 4 1 3]) "dallas"))
             )
     }
-  permutation-seq->string [numSeq characters]
+  permutation-seq->string [characters numSeq]
   (apply str (map (fn [i] (.charAt characters (dec i))) numSeq))
+  )
+
+(defn
+  ^{:doc  ""
+    :test (fn []
+            (is (= (match-password? "dallas" "23f2916e01209d6282f226be9677affaec44a8d6") true))
+            )
+    }
+  match-password? [password hash]
+  (= (sha1 password) hash)
+  )
+
+(defn
+  ^{:doc  "find password from hash"
+    :test (fn []
+            (is (= (hash->password "23f2916e01209d6282f226be9677affaec44a8d6" "adsl") "dallas"))
+            )
+    }
+  hash->password [hash characters]
+  (let [permutation-seq->string-partial (partial permutation-seq->string characters)]
+    (first
+      (filter (fn [potentialPasswordHash] (= hash (sha1 potentialPasswordHash)))
+              (map permutation-seq->string-partial
+                   (lazy-permutation-seq
+                     (.length characters))))))
   )
