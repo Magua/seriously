@@ -42,20 +42,20 @@
     :test (fn []
             (is (= (calc-next-permutation [] 1) [1]))
             (is (= (calc-next-permutation [3] 3) [1 1]))
-            (is (= (calc-next-permutation [1 3 3] 3) [2 1 1]))
+            (is (= (calc-next-permutation [1 2 3 3] 3) [1 3 1 1]))
+            (is (= (calc-next-permutation [1 2 3 4 5] 5) [1 2 3 5 1]))
+            (is (= (calc-next-permutation [2 2 3] 3) [2 3 1]))
             (is (= (calc-next-permutation [65 65 65] 65) [1 1 1 1]))
             )}
   calc-next-permutation [currentSeq len]
-  ; todo get allButLast and last without double reverse
-  (let [last (last currentSeq)
-        r (vec (reverse (rest (rseq currentSeq))))]
+
+  (let [butlast (vec (butlast currentSeq))
+        last (last currentSeq)]
     (cond
       (empty? currentSeq) [1]
-      (< last len) (conj r (inc last))
+      (< last len) (conj butlast (inc last))
       :else
-      (conj (calc-next-permutation r len) 1))
-    )
-  )
+      (conj (calc-next-permutation butlast len) 1))))
 
 (defn
   ^{:doc  "Lazy permutaion seq"
@@ -109,7 +109,7 @@
   hash->password [hash characters]
   (let [permutation-seq->string-partial (partial permutation-seq->string characters)]
     (first
-      (filter (fn [potentialPasswordHash] (= hash (sha1 potentialPasswordHash)))
+      (filter (fn [potentialPassword] (= hash (sha1 potentialPassword)))
               (map permutation-seq->string-partial
                    (lazy-permutation-seq
                      (.length characters))))))
