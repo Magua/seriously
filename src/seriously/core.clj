@@ -109,7 +109,7 @@
   hash->password [hash characters]
   (let [permutation-seq->string-partial (partial permutation-seq->string characters)]
     (first
-      (filter (fn [potentialPassword] (= hash (sha1 potentialPassword)))
+      (filter #(= hash (sha1 %))
               (map permutation-seq->string-partial
                    (lazy-permutation-seq
                      (.length characters))))))
