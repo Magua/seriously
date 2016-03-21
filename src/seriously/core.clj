@@ -12,7 +12,7 @@
 (defn
   ^{:doc  "sha 1 hasher from stack overflow gist: https://gist.github.com/prasincs/827272"
     :test (fn []
-            (is (= (get-hash-str (sha1-hash "dallas")) "23f2916e01209d6282f226be9677affaec44a8d6"))
+            (= (get-hash-str (sha1-hash "dallas")) "23f2916e01209d6282f226be9677affaec44a8d6")
             )}
   get-hash-str [data-bytes]
   (apply str
@@ -40,12 +40,12 @@
       _cns(currentSeq)
   }"
     :test (fn []
-            (is (= (calc-next-permutation [] 1) [1]))
-            (is (= (calc-next-permutation [3] 3) [1 1]))
-            (is (= (calc-next-permutation [1 2 3 3] 3) [1 3 1 1]))
-            (is (= (calc-next-permutation [1 2 3 4 5] 5) [1 2 3 5 1]))
-            (is (= (calc-next-permutation [2 2 3] 3) [2 3 1]))
-            (is (= (calc-next-permutation [65 65 65] 65) [1 1 1 1]))
+            (= (calc-next-permutation [] 1) [1])
+            (= (calc-next-permutation [3] 3) [1 1])
+            (= (calc-next-permutation [1 2 3 3] 3) [1 3 1 1])
+            (= (calc-next-permutation [1 2 3 4 5] 5) [1 2 3 5 1])
+            (= (calc-next-permutation [2 2 3] 3) [2 3 1])
+            (= (calc-next-permutation [65 65 65] 65) [1 1 1 1])
             )}
   calc-next-permutation [currentSeq len]
 
@@ -110,5 +110,6 @@
   (let [permutation-seq->string-partial (partial permutation-seq->string characters)]
     (->> (lazy-permutation-seq (.length characters))
          (map permutation-seq->string-partial)
+         (map-indexed #(if (= (mod %1 10000) 0) (do (println %1 %2) %2) (do %2)))
          (filter #(= hash (sha1 %)))
          (first))))
