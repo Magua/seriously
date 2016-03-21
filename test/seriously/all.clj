@@ -3,7 +3,7 @@
 
 (deftest all
   (let [namespaces '(
-                      "collections.core")]
+                      "seriously.core")]
     (do
       (apply require (map symbol namespaces))
       (is (successful? (time (apply run-tests (map symbol namespaces))))))))
