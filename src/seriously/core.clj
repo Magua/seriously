@@ -1,7 +1,8 @@
 (ns seriously.core
   (:use [clojure.test :only (is run-tests function?)]
         [clojure.repl :only (doc)]
-        [test.core :only [is=]]))
+        [test.core :only [is=]])
+  (:require [clojure.string :as str]))
 
 (defn get-hash [type data]
   (.digest (java.security.MessageDigest/getInstance type) (.getBytes data)))
@@ -40,15 +41,14 @@
       _cns(currentSeq)
   }"
     :test (fn []
-            (= (calc-next-permutation [] 1) [1])
-            (= (calc-next-permutation [3] 3) [1 1])
-            (= (calc-next-permutation [1 2 3 3] 3) [1 3 1 1])
-            (= (calc-next-permutation [1 2 3 4 5] 5) [1 2 3 5 1])
-            (= (calc-next-permutation [2 2 3] 3) [2 3 1])
-            (= (calc-next-permutation [65 65 65] 65) [1 1 1 1])
+            (is= (calc-next-permutation [] 1) [1])
+            (is= (calc-next-permutation [3] 3) [1 1])
+            (is= (calc-next-permutation [1 2 3 3] 3) [1 3 1 1])
+            (is= (calc-next-permutation [1 2 3 4 5] 5) [1 2 3 5 1])
+            (is= (calc-next-permutation [2 2 3] 3) [2 3 1])
+            (is= (calc-next-permutation [65 65 65] 65) [1 1 1 1])
             )}
   calc-next-permutation [currentSeq len]
-
   (let [butlast (vec (butlast currentSeq))
         last (last currentSeq)]
     (cond
@@ -57,12 +57,34 @@
       :else
       (conj (calc-next-permutation butlast len) 1))))
 
+
+(defn
+  ^{:doc  "Represents the number (given in base 10) in the given base in the form of a vector."
+    :test (fn []
+            (is= (number->permutation 0 5) '(0))
+            (is= (number->permutation 1 5) '(1))
+            (is= (number->permutation 4 5) '(4))
+            (is= (number->permutation 5 5) '(1 0))
+            (is= (number->permutation 27 5) '(1 0 2)))}
+  number->permutation [n base]
+  (->> (seq (Integer/toString n base))
+       (map (fn [n] (Integer/valueOf (str n))))))
+
+(defn
+  ^{:test (fn []
+            (is= (last (take 1 (lazy-seq-of-permutations 3))) '(0))
+            (is= (take 5 (lazy-seq-of-permutations 2)) '((0) (1) (1 0) (1 1) (1 0 0)))
+            (is= (last (take 28 (lazy-seq-of-permutations 5))) '(1 0 2)))}
+  lazy-seq-of-permutations [base]
+  (->> (range)
+       (map (fn [n] (number->permutation n base)))))
+
 (defn
   ^{:doc  "Lazy permutaion seq"
     :test (fn []
-            (is (= (take 2 (lazy-permutation-seq 3)) [[1] [2]]))
-            (is (= (nth (lazy-permutation-seq 3) 119) [3 3 3 3]))
-            (is (= (nth (lazy-permutation-seq 1) 0) [1]))
+            (is= (take 2 (lazy-permutation-seq 3)) [[1] [2]])
+            (is= (nth (lazy-permutation-seq 3) 119) [3 3 3 3])
+            (is= (nth (lazy-permutation-seq 1) 0) [1])
             )
     }
   lazy-permutation-seq

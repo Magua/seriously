@@ -5,6 +5,6 @@
                  [http-kit "2.1.18"]
                  [compojure "1.4.0"]
                  [org.clojure/data.json "0.2.6"]]
-  :main ^:skip-aot firestone.core
+  :main ^:skip-aot seriously.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
